@@ -1,5 +1,4 @@
-﻿using pos_system.Models;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace pos_system.Order
 {

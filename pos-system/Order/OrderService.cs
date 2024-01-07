@@ -107,7 +107,7 @@ namespace pos_system.Order
             {
                 Id = product.Id,
                 Name = product.Name,
-                Category = product.Category,
+                Category = product.CategoryType,
                 Price = product.Price,
                 Quantity = newProduct.Quantity,
                 OrderId = orderId,
