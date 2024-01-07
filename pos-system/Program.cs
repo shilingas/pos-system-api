@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using pos_system.Contexts;
+using pos_system.Order;
+using pos_system.Services;
 using System;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +14,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<PosContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IServiceService, ServiceService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
