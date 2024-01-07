@@ -8,12 +8,15 @@ namespace pos_system.Order
         Task<OrderModel> CreateOrder(string customerId);
         Task<bool> DeleteOrder(string id);
         Task<bool> DeleteProductFromOrder(string orderId, string productId);
+        Task<bool> DeleteServiceFromOrder(string orderId, string serviceId);
         Task<OrderModel[]> GetAllOrders();
         Task<List<OrderProductModel>> GettAllProducts(string orderId);
         Task<List<OrderServiceModel>> GettAllServices(string orderId);
         Task<OrderModel?> GetOrder(string id);
         Task<OrderProductModel?> GetProductOfAnOrder(string orderId, string productId);
+        Task<OrderServiceModel?> GetServiceOfAnOrder(string orderId, string serviceId);
         Task<OrderModel?> UpdateOrder(string id, OrderPutRequestModel newOrder);
         Task<OrderProductModel?> UpdateOrderProduct(string orderId, string productId, OrderProductPostRequestModel newOrder);
+        Task<OrderServiceModel?> UpdateOrderService(string orderId, string serviceId, OrderServicePostRequestModel newService);
     }
 }

@@ -160,5 +160,45 @@ namespace pos_system.Order
 
         }
 
+        [HttpGet("{orderId}/services/{serviceId}")]
+        public async Task<ActionResult<OrderServiceModel>> GetServiceOfAnOrder(string orderId, string serviceId)
+        {
+            OrderServiceModel? orderService = await _orderService.GetServiceOfAnOrder(orderId, serviceId);
+            if (orderService == null)
+            {
+                return NotFound();
+            }
+            return orderService;
+        }
+
+        [HttpPut("{orderId}/services/{serviceId}")]
+        [Produces("application/json")]
+        public async Task<ActionResult<OrderServiceModel>> UpdateOrderService(string orderId, string serviceId, [FromBody] OrderServicePostRequestModel newService)
+        {
+            OrderServiceModel? orderService = await _orderService.UpdateOrderService(orderId, serviceId, newService);
+            if (orderService != null)
+            {
+                return Ok(orderService);
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpDelete("{orderId}/services/{serviceId}")]
+        public async Task<IActionResult> DeleteServiceFromOrder(string orderId, string serviceId)
+        {
+            if (await _orderService.DeleteServiceFromOrder(orderId, serviceId))
+            {
+                return NoContent();
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
+
     }
 }
