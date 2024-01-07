@@ -187,5 +187,56 @@ namespace pos_system.Order
 
             return orderService;
         }
+
+        public async Task<OrderServiceModel?> GetServiceOfAnOrder(string orderId, string serviceId)
+        {
+            OrderServiceModel? orderService = await _context.OrderServices.FirstOrDefaultAsync(o => o.OrderId == orderId && o.Id == serviceId);
+            if (orderService == null)
+            {
+                return null;
+            }
+            return orderService;
+        }
+
+        public async Task<OrderServiceModel?> UpdateOrderService(string orderId, string serviceId, OrderServicePostRequestModel newService)
+        {
+            if (!isValidOrderServicePostRequestModel(newService, serviceId))
+            {
+                return null;
+            }
+
+            OrderServiceModel? orderService = await _context.OrderServices.FirstOrDefaultAsync(o => o.OrderId == orderId && o.Id == serviceId);
+
+            if (orderService != null)
+            {
+                orderService.Quantity = newService.Quantity;
+
+                await _context.SaveChangesAsync();
+                return orderService;
+            }
+            return null;
+        }
+
+        public async Task<bool> DeleteServiceFromOrder(string orderId, string serviceId)
+        {
+            var orderService = await _context.OrderServices.FirstOrDefaultAsync(o => o.OrderId == orderId && o.Id == serviceId);
+            if (orderService == null)
+            {
+                return false;
+            }
+
+            _context.OrderServices.Remove(orderService);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        private bool isValidOrderServicePostRequestModel(OrderServicePostRequestModel orderService, string serviceId) { 
+            if (orderService.ServicetId == serviceId)
+            {
+                return true;
+            }
+            return false;
+        }
     }
 }
