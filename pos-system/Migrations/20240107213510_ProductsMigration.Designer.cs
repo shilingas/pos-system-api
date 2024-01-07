@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using pos_system.Contexts;
 
@@ -11,9 +12,10 @@ using pos_system.Contexts;
 namespace pos_system.Migrations
 {
     [DbContext(typeof(PosContext))]
-    partial class PosContextModelSnapshot : ModelSnapshot
+    [Migration("20240107213510_ProductsMigration")]
+    partial class ProductsMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,25 +23,6 @@ namespace pos_system.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
-
-            modelBuilder.Entity("pos_system.Coupons.CouponModel", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<decimal?>("Discount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ValidUntilDateTime")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Coupons");
-                });
 
             modelBuilder.Entity("pos_system.Customers.CustomerModel", b =>
                 {
