@@ -17,6 +17,7 @@ namespace pos_system.Order
         public DateTime? CreatedDateTime { get; set; }
         public OrderStatus? Status { get; set; }
         public virtual List<OrderProductModel>? Products { get; set; }
+        public virtual List<OrderServiceModel>? Services { get; set; }
 
     }
 }

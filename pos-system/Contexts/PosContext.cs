@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using pos_system.Models;
 using pos_system.Order;
+using pos_system.Services;
 using System.Data.Entity.ModelConfiguration.Conventions;
 
 namespace pos_system.Contexts
@@ -15,5 +16,6 @@ namespace pos_system.Contexts
         public DbSet<ServiceModel> Services { get; set; }
         public DbSet<OrderModel> Orders { get; set; }
         public DbSet<OrderProductModel> OrderProducts { get; set; }
+        public DbSet<OrderServiceModel> OrderServices{ get; set;}
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace pos_system.Models
+namespace pos_system.Services
 {
     public class ServiceModel
     {
@@ -8,6 +8,6 @@ namespace pos_system.Models
         public string? Id { get; set; }
         public string? Name { get; set; }
         public float? Duration { get; set; }
-        public float? Price { get; set; }
+        public decimal? Price { get; set; }
     }
 }

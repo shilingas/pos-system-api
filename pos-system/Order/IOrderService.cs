@@ -1,0 +1,19 @@
+﻿
+namespace pos_system.Order
+{
+    public interface IOrderService
+    {
+        Task<OrderProductModel?> AddProductToOrder(string orderId, OrderProductPostRequestModel newProduct);
+        Task<OrderServiceModel?> AddServiceToOrder(string orderId, OrderServicePostRequestModel orderServicePostRequest);
+        Task<OrderModel> CreateOrder(string customerId);
+        Task<bool> DeleteOrder(string id);
+        Task<bool> DeleteProductFromOrder(string orderId, string productId);
+        Task<OrderModel[]> GetAllOrders();
+        Task<List<OrderProductModel>> GettAllProducts(string orderId);
+        Task<List<OrderServiceModel>> GettAllServices(string orderId);
+        Task<OrderModel?> GetOrder(string id);
+        Task<OrderProductModel?> GetProductOfAnOrder(string orderId, string productId);
+        Task<OrderModel?> UpdateOrder(string id, OrderPutRequestModel newOrder);
+        Task<OrderProductModel?> UpdateOrderProduct(string orderId, string productId, OrderProductPostRequestModel newOrder);
+    }
+}

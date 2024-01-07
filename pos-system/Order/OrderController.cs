@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using pos_system.Contexts;
-using pos_system.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Data.Entity.Core.Mapping;
 
 namespace pos_system.Order
 {
@@ -10,9 +8,9 @@ namespace pos_system.Order
     [ApiController]
     public class OrderController : ControllerBase
     {
-        private readonly PosContext? _context;
-        private readonly OrderService _orderService;
-        public OrderController(PosContext? context, OrderService orderService) {
+        private readonly PosContext _context;
+        private readonly IOrderService _orderService;
+        public OrderController(PosContext context, IOrderService orderService) {
             _context = context;
             _orderService = orderService;
         }
@@ -20,97 +18,96 @@ namespace pos_system.Order
         [HttpGet]
         public async Task<OrderModel[]> GetAllOrders()
         {
-            var orders = await _context.Orders.ToArrayAsync();
-            return orders;
-            //return await _orderService.GetAllOrders();
+            return await _orderService.GetAllOrders();
         }
 
         [HttpPost]
         [Produces("application/json")]
         public async Task<IActionResult> CreateOrder([FromBody] string customerId)
         {
-            var order = new OrderModel { Id = Guid.NewGuid().ToString(), CustomerId = customerId };
-            _context.Add(order);
-            await _context.SaveChangesAsync();
-            return Ok(_orderService.CreateOrder(customerId));
+            if (!String.IsNullOrEmpty(customerId)) { 
+                return Ok(await _orderService.CreateOrder(customerId));
+            }else
+            {
+                return BadRequest();
+            }
         }
 
         [HttpGet("{id}")]
-        public async Task<OrderModel> GetOrder(string id)
+        public async Task<ActionResult<OrderModel>> GetOrder(string id)
         {
-            var order = await _context.Orders.FindAsync(id);
-            return order;
-            //return await _orderService.GetOrder(id);
+
+            OrderModel? order = await _orderService.GetOrder(id);
+            if (order != null)
+            {
+                return order;
+            }
+            else
+            {
+                return NotFound();
+            }
         }
 
         [HttpPut("{id}")]
         [Produces("application/json")]
-        public async Task<IActionResult> UpdateOrder(string id, [FromBody] OrderRequestModel newOrder)
+        public async Task<IActionResult> UpdateOrder(string id, [FromBody] OrderPutRequestModel newOrder)
         {
-            var result = await _context.Orders.SingleOrDefaultAsync(order => order.Id == id);
-            
-            if (result != null)
+            OrderModel? order = await _orderService.UpdateOrder(id, newOrder);
+            if (order != null)
             {
-                result.Id = newOrder.Id;
-                result.CustomerId = newOrder.CustomerId;
-                result.CreatedDateTime = newOrder.CreatedDateTime;
-                result.Status = newOrder.Status;
-
-                await _context.SaveChangesAsync();
-                return Ok(result);
+                return Ok(order);
             }
-            return BadRequest();
+            else
+            {
+                return BadRequest();
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrder(string id)
         {
-            var order = await _context.Orders.FindAsync(id);
-            if (order == null)
+            bool isDeleted = await _orderService.DeleteOrder(id);
+            if (isDeleted)
+            {
+                return NoContent();
+            }
+            else
             {
                 return NotFound();
             }
-
-            _context.Orders.Remove(order);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
 
         [HttpGet("{orderId}/products")]
-        public async Task<List<OrderProductModel>> gettAllProducts(string orderId)
+        public async Task<List<OrderProductModel>> GettAllProducts(string orderId)
         {
-            var orderProducts = await _context.OrderProducts.Where(o => o.OrderId == orderId).ToListAsync();
-            return orderProducts; 
+            return await _orderService.GettAllProducts(orderId);
         }
 
         [HttpPost("{orderId}/products")]
         [Produces("application/json")]
         public async Task<IActionResult> AddProductToOrder(string orderId, [FromBody] OrderProductPostRequestModel newProduct)
         {
-            //var order = await _context.Orders.Include(o => o.Products).SingleOrDefaultAsync(o => o.Id == orderId); ;
-            var product = await _context.Products.FindAsync(newProduct.ProductId);
-
-            var orderProduct = new OrderProductModel { 
-                Id = product.Id, 
-                Name = product.Name, 
-                Category = product.Category, 
-                Price = product.Price, 
-                Quantity = newProduct.Quantity,
-                OrderId = orderId,
-            };
-
-            _context.Add(orderProduct);
-            await _context.SaveChangesAsync();
-
-            return Ok(orderProduct);
+            OrderProductModel? orderProduct = await _orderService.AddProductToOrder(orderId, newProduct);
+            if (orderProduct != null)
+            {
+                return Ok(orderProduct);
+            }
+            else
+            {
+                return NotFound();
+            }
+            
         }
 
 
         [HttpGet("{orderId}/products/{productId}")]
-        public async Task<OrderProductModel> getProductOfAnOrder(string orderId, string productId)
+        public async Task<ActionResult<OrderProductModel>> GetProductOfAnOrder(string orderId, string productId)
         {
-            var orderProduct = await _context.OrderProducts.FirstOrDefaultAsync(o => o.OrderId == orderId && o.Id == productId);
+            OrderProductModel? orderProduct = await _orderService.GetProductOfAnOrder(orderId, productId);
+            if (orderProduct == null)
+            {
+                return NotFound();
+            }
             return orderProduct;
         }
 
@@ -118,31 +115,49 @@ namespace pos_system.Order
         [Produces("application/json")]
         public async Task<IActionResult> UpdateOrderProduct(string orderId, string productId, [FromBody] OrderProductPostRequestModel newOrder)
         {
-            var orderProduct = await _context.OrderProducts.FirstOrDefaultAsync(o => o.OrderId == orderId && o.Id == productId);
-
+            OrderProductModel? orderProduct = await _orderService.UpdateOrderProduct(orderId, productId, newOrder);
             if (orderProduct != null)
             {
-                orderProduct.Quantity = newOrder.Quantity;
-
-                await _context.SaveChangesAsync();
                 return Ok(orderProduct);
             }
-            return BadRequest();
+            else
+            {
+                return BadRequest();
+            }
         }
 
         [HttpDelete("{orderId}/products/{productId}")]
         public async Task<IActionResult> DeleteProductFromOrder(string orderId, string productId)
         {
-            var orderProduct = await _context.OrderProducts.FirstOrDefaultAsync(o => o.OrderId == orderId && o.Id == productId);
-            if (orderProduct == null)
+            if (await _orderService.DeleteProductFromOrder(orderId, productId))
+            {
+                return NoContent();
+            }
+            else{
+                return NotFound();
+            }
+        }
+
+        [HttpGet("{orderId}/services")]
+        public async Task<List<OrderServiceModel>> GettAllServices(string orderId)
+        {
+            return await _orderService.GettAllServices(orderId);
+        }
+
+        [HttpPost("{orderId}/services")]
+        [Produces("application/json")]
+        public async Task<ActionResult<OrderServiceModel>> AddServuceToOrder(string orderId, [FromBody] OrderServicePostRequestModel newService)
+        {
+            OrderServiceModel? orderService = await _orderService.AddServiceToOrder(orderId, newService);
+            if (orderService != null)
+            {
+                return Ok(orderService);
+            }
+            else
             {
                 return NotFound();
             }
 
-            _context.OrderProducts.Remove(orderProduct);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
 
     }
