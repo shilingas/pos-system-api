@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using pos_system.Coupons;
 using pos_system.Admins;
 using pos_system.Customers;
-using pos_system.Models;
 using pos_system.Order;
+using pos_system.Products;
 using pos_system.Reservation;
 using pos_system.Services;
 using System.Data.Entity.ModelConfiguration.Conventions;
@@ -22,6 +23,7 @@ namespace pos_system.Contexts
         public DbSet<OrderServiceModel> OrderServices{ get; set;}
         public DbSet<CustomerModel> Customers { get; set; }
         public DbSet<ReservationModel> Reservations { get; set; }
+        public DbSet<CouponModel> Coupons { get; set; }
         public DbSet<AdminModel> Admins { get; set; }
     }
 }
