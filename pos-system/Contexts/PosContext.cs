@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using pos_system.Admins;
 using pos_system.Customers;
 using pos_system.Models;
 using pos_system.Order;
@@ -21,5 +22,6 @@ namespace pos_system.Contexts
         public DbSet<OrderServiceModel> OrderServices{ get; set;}
         public DbSet<CustomerModel> Customers { get; set; }
         public DbSet<ReservationModel> Reservations { get; set; }
+        public DbSet<AdminModel> Admins { get; set; }
     }
 }
