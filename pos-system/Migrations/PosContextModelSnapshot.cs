@@ -46,7 +46,7 @@ namespace pos_system.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Admins");
-                });
+                }));
 
             modelBuilder.Entity("pos_system.Customers.CustomerModel", b =>
                 {
