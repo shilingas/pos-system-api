@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using pos_system.Contexts;
+using pos_system.Customers;
 using pos_system.Reservation;
 
 namespace pos_system.Products
@@ -10,32 +11,29 @@ namespace pos_system.Products
     public class ProductController : Controller
     {
         private readonly PosContext _context;
+        private readonly IProductService _productService;
 
-        public ProductController(PosContext _context)
+        public ProductController(PosContext _context, IProductService productService)
         {
             this._context = _context;
+            _productService = productService;
         }
 
         [HttpPost]
         [Produces("application/json")]
         public async Task<ActionResult<ProductModel>> CreateProduct([FromBody] ProductPostRequestModel productPostRequest)
         {
-            ProductModel product = new ProductModel
+            ProductModel? product = await _productService.CreateProduct(productPostRequest);
+            if (product == null)
             {
-                Id = Guid.NewGuid().ToString(),
-                Name = productPostRequest.Name,
-                Price = productPostRequest.Price,
-                CategoryType = productPostRequest.CategoryType,
-            };
-            _context.Add(product);
-            await _context.SaveChangesAsync();
-            return product;
+                return BadRequest();
+            }
+            return Ok(product);
         }
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductModel>?> GetProduct(string id)
         {
-            ProductModel? product = new ProductModel();
-            product = await _context.Products.FindAsync(id);
+            ProductModel? product = await _productService.GetProduct(id);
             if (product != null)
             {
                 return product;
@@ -48,71 +46,38 @@ namespace pos_system.Products
         [HttpGet]
         public async Task<ProductModel[]> GetAllProducts()
         {
-            ProductModel[] products = new ProductModel[0];
-            if (_context != null)
-            {
-                products = await _context.Products.ToArrayAsync();
-            }
-
-            return products;
+            return await _productService.GetAllProducts();
         }
         [HttpDelete("{id}")]
-        public async Task<bool> DeleteProduct(string id)
+        public async Task<ActionResult> DeleteProduct(string id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
+            bool isDeleted = await _productService.DeleteProduct(id);
+            if (isDeleted)
             {
-                return false;
+                return NoContent();
             }
-            var orderProduct = await _context.OrderProducts.FirstOrDefaultAsync(p => p.ProductId == id);
-            if (orderProduct != null)
-            {
-                orderProduct.ProductId = null;
-            }
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
-
-            return true;
+            return NotFound();
         }
+
         [HttpPut("{productId}")]
-        public async Task<ProductModel?> UpdateProduct(string productId, ProductPostRequestModel productUpdateModel)
+        public async Task<ActionResult> UpdateProduct(string productId, ProductPostRequestModel productUpdateModel)
         {
-            ProductModel? updated = new ProductModel();
-            if (_context != null)
+            ProductModel? product = await _productService.UpdateProduct(productId, productUpdateModel);
+            if (product != null)
             {
-                updated = await _context.Products.SingleOrDefaultAsync(prod => prod.Id == productId);
-                if (updated == null)
-                {
-                    return null;
-                }
-                if (productUpdateModel.Name != null)
-                {
-                    updated.Name = productUpdateModel.Name;
-                }
-                if (productUpdateModel.Price != null)
-                {
-                    updated.Price = productUpdateModel.Price;
-                }
-                if (productUpdateModel.CategoryType != null)
-                {
-                    updated.CategoryType = productUpdateModel.CategoryType;
-                }
-                await _context.SaveChangesAsync();
-                return updated;
+                return Ok(product);
             }
-            return null;
+            else
+            {
+                return NotFound();
+            }
 
         }
         [HttpGet("bycategory/{categoryType}")]
 
         public async Task<ProductModel[]> GetProductsByCategory(string categoryType)
         {
-            if (_context != null)
-            {
-                var productsByCategory = await _context.Products.Where(product => product.CategoryType == categoryType).ToArrayAsync();
-                return productsByCategory;
-            }
-            return null;
+            return await _productService.GetProductsByCategory(categoryType);
         }
 
     }
