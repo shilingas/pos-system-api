@@ -17,15 +17,6 @@ namespace pos_system.Contexts
         {
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<OrderProductModel>()
-                .HasOne(op => op.Product) 
-                .WithMany(p => p.Orders) 
-                .HasForeignKey(op => op.ProductId) 
-                .OnDelete(DeleteBehavior.SetNull); 
-        }
-
         public DbSet<ProductModel> Products { get; set; }
         public DbSet<ServiceModel> Services { get; set; }
         public DbSet<OrderModel> Orders { get; set; }
