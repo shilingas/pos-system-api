@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using pos_system.Order;
+using System.Diagnostics.CodeAnalysis;
 
 namespace pos_system.Products
 {
@@ -14,5 +15,6 @@ namespace pos_system.Products
         public string? Name { get; set; }
         public decimal? Price { get; set; }
         public string? CategoryType { get; set; }
+        public virtual List<OrderProductModel> Orders { get; set; }
     }
 }
