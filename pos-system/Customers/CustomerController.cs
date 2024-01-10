@@ -55,18 +55,18 @@ namespace pos_system.Customers
             return customers;
         }
         [HttpDelete("{id}")]
-        public async Task<bool> DeleteCustomer(string id)
+        public async Task<ActionResult> DeleteCustomer(string id)
         {
             var customer = await _context.Customers.FindAsync(id);
             if (customer == null)
             {
-                return false;
+                return NotFound();
             }
 
             _context.Customers.Remove(customer);
             await _context.SaveChangesAsync();
 
-            return true;
+            return Ok();
         }
         [HttpPut("{customerId}")]
         public async Task<CustomerModel?> UpdateCustomer(string customerId, CustomerPostRequestModel customerModel)
