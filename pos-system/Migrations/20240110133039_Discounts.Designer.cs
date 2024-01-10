@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using pos_system.Contexts;
 
@@ -11,9 +12,10 @@ using pos_system.Contexts;
 namespace pos_system.Migrations
 {
     [DbContext(typeof(PosContext))]
-    partial class PosContextModelSnapshot : ModelSnapshot
+    [Migration("20240110133039_Discounts")]
+    partial class Discounts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -45,7 +47,7 @@ namespace pos_system.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Admins");
-                }));
+                });
 
             modelBuilder.Entity("pos_system.Coupons.CouponModel", b =>
                 {
@@ -99,49 +101,6 @@ namespace pos_system.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Discounts");
-                });
-
-            modelBuilder.Entity("pos_system.Discounts.DiscountProductModel", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("DiscountId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DiscountModelId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ProductId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DiscountModelId");
-
-                    b.ToTable("DiscountProducts");
-                });
-
-            modelBuilder.Entity("pos_system.Discounts.DiscountServiceModel", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("DiscountId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ServiceId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("DiscountServices");
                 });
 
             modelBuilder.Entity("pos_system.Order.OrderModel", b =>
@@ -277,13 +236,6 @@ namespace pos_system.Migrations
                     b.ToTable("Services");
                 });
 
-            modelBuilder.Entity("pos_system.Discounts.DiscountProductModel", b =>
-                {
-                    b.HasOne("pos_system.Discounts.DiscountModel", null)
-                        .WithMany("Products")
-                        .HasForeignKey("DiscountModelId");
-                });
-
             modelBuilder.Entity("pos_system.Order.OrderProductModel", b =>
                 {
                     b.HasOne("pos_system.Order.OrderModel", "Order")
@@ -298,11 +250,6 @@ namespace pos_system.Migrations
                     b.HasOne("pos_system.Order.OrderModel", null)
                         .WithMany("Services")
                         .HasForeignKey("OrderModelId");
-                });
-
-            modelBuilder.Entity("pos_system.Discounts.DiscountModel", b =>
-                {
-                    b.Navigation("Products");
                 });
 
             modelBuilder.Entity("pos_system.Order.OrderModel", b =>
