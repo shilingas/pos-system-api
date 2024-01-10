@@ -64,7 +64,11 @@ namespace pos_system.Products
             {
                 return false;
             }
-
+            var orderProduct = await _context.OrderProducts.FirstOrDefaultAsync(p => p.ProductId == id);
+            if (orderProduct != null)
+            {
+                orderProduct.ProductId = null;
+            }
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
 
