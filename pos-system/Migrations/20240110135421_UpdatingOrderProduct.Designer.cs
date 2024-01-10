@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using pos_system.Contexts;
 
@@ -11,9 +12,10 @@ using pos_system.Contexts;
 namespace pos_system.Migrations
 {
     [DbContext(typeof(PosContext))]
-    partial class PosContextModelSnapshot : ModelSnapshot
+    [Migration("20240110135421_UpdatingOrderProduct")]
+    partial class UpdatingOrderProduct
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -161,9 +163,6 @@ namespace pos_system.Migrations
 
                     b.Property<int?>("Quantity")
                         .HasColumnType("int");
-
-                    b.Property<string>("ServiceId")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

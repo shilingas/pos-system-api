@@ -1,4 +1,6 @@
 ﻿
+using pos_system.Products;
+
 namespace pos_system.Order
 {
     public interface IOrderService
@@ -10,8 +12,8 @@ namespace pos_system.Order
         Task<bool> DeleteProductFromOrder(string orderId, string productId);
         Task<bool> DeleteServiceFromOrder(string orderId, string serviceId);
         Task<OrderModel[]> GetAllOrders();
-        Task<List<OrderProductModel>> GettAllProducts(string orderId);
-        Task<List<OrderServiceModel>> GettAllServices(string orderId);
+        Task<List<OrderProductModel?>> GetAllProducts(string orderId);
+        Task<List<OrderServiceModel>> GetAllServices(string orderId);
         Task<OrderModel?> GetOrder(string id);
         Task<OrderProductModel?> GetProductOfAnOrder(string orderId, string productId);
         Task<OrderServiceModel?> GetServiceOfAnOrder(string orderId, string serviceId);
