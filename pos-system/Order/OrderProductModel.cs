@@ -15,6 +15,7 @@ namespace pos_system.Order
 
         public string? OrderId { get; set; }
         public virtual OrderModel? Order { get; set; }
+        public virtual ProductModel? Product { get; set; }
 
     }
 }
