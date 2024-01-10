@@ -7,6 +7,7 @@ using pos_system.Products;
 using pos_system.Reservation;
 using pos_system.Services;
 using System.Data.Entity.ModelConfiguration.Conventions;
+using pos_system.Discounts;
 
 namespace pos_system.Contexts
 {
@@ -25,5 +26,8 @@ namespace pos_system.Contexts
         public DbSet<ReservationModel> Reservations { get; set; }
         public DbSet<CouponModel> Coupons { get; set; }
         public DbSet<AdminModel> Admins { get; set; }
+        public DbSet<DiscountModel> Discounts { get; set; }
+        public DbSet<DiscountProductModel> DiscountProducts { get; set; }
+        public DbSet<DiscountServiceModel> DiscountServices { get; set; }
     }
 }

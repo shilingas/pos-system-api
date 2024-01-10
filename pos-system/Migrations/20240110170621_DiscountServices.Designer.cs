@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using pos_system.Contexts;
 
@@ -11,9 +12,10 @@ using pos_system.Contexts;
 namespace pos_system.Migrations
 {
     [DbContext(typeof(PosContext))]
-    partial class PosContextModelSnapshot : ModelSnapshot
+    [Migration("20240110170621_DiscountServices")]
+    partial class DiscountServices
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -155,15 +157,10 @@ namespace pos_system.Migrations
                     b.Property<string>("CustomerId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ProductModelId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<int?>("Status")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ProductModelId");
 
                     b.ToTable("Orders");
                 });
@@ -184,9 +181,6 @@ namespace pos_system.Migrations
 
                     b.Property<decimal?>("Price")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("ProductId")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("Quantity")
                         .HasColumnType("int");
@@ -220,9 +214,6 @@ namespace pos_system.Migrations
 
                     b.Property<int?>("Quantity")
                         .HasColumnType("int");
-
-                    b.Property<string>("ServiceId")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -287,12 +278,7 @@ namespace pos_system.Migrations
 
                     b.ToTable("Services");
                 });
-            modelBuilder.Entity("pos_system.Order.OrderModel", b =>
-                {
-                    b.HasOne("pos_system.Products.ProductModel", null)
-                        .WithMany("Orders")
-                        .HasForeignKey("ProductModelId");
-                });
+
             modelBuilder.Entity("pos_system.Discounts.DiscountProductModel", b =>
                 {
                     b.HasOne("pos_system.Discounts.DiscountModel", null)
@@ -326,11 +312,6 @@ namespace pos_system.Migrations
                     b.Navigation("Products");
 
                     b.Navigation("Services");
-                });
-
-            modelBuilder.Entity("pos_system.Products.ProductModel", b =>
-                {
-                    b.Navigation("Orders");
                 });
 #pragma warning restore 612, 618
         }
