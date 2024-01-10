@@ -4,6 +4,8 @@ using pos_system.Order;
 
 namespace pos_system.Bill
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class BillController
     {
         private readonly IBillService _billService;
