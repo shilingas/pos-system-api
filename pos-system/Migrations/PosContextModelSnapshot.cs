@@ -155,10 +155,15 @@ namespace pos_system.Migrations
                     b.Property<string>("CustomerId")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ProductModelId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<int?>("Status")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ProductModelId");
 
                     b.ToTable("Orders");
                 });
@@ -181,7 +186,7 @@ namespace pos_system.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("ProductId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("Quantity")
                         .HasColumnType("int");
@@ -189,8 +194,6 @@ namespace pos_system.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
-
-                    b.HasIndex("ProductId");
 
                     b.ToTable("OrderProducts");
                 });
@@ -284,7 +287,12 @@ namespace pos_system.Migrations
 
                     b.ToTable("Services");
                 });
-
+            modelBuilder.Entity("pos_system.Order.OrderModel", b =>
+                {
+                    b.HasOne("pos_system.Products.ProductModel", null)
+                        .WithMany("Orders")
+                        .HasForeignKey("ProductModelId");
+                });
             modelBuilder.Entity("pos_system.Discounts.DiscountProductModel", b =>
                 {
                     b.HasOne("pos_system.Discounts.DiscountModel", null)
@@ -298,14 +306,7 @@ namespace pos_system.Migrations
                         .WithMany("Products")
                         .HasForeignKey("OrderId");
 
-                    b.HasOne("pos_system.Products.ProductModel", "Product")
-                        .WithMany("Orders")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.Navigation("Order");
-
-                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("pos_system.Order.OrderServiceModel", b =>
