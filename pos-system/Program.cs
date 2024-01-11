@@ -5,6 +5,8 @@ using pos_system.Discounts;
 using pos_system.Coupons;
 using pos_system.Customers;
 using pos_system.Order;
+using pos_system.Roles;
+using pos_system.Workers;
 using pos_system.Products;
 using pos_system.Reservation;
 using pos_system.Services;
@@ -25,6 +27,8 @@ builder.Services.AddDbContext<PosContext>(options => options.UseSqlServer(connec
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<ICouponService, CouponService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IWorkerService, WorkerService>();
 builder.Services.AddScoped<IDiscountService, DiscountService>();
 builder.Services.AddScoped<IBillService, BillService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();

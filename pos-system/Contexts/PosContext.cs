@@ -1,3 +1,5 @@
+//PosContext
+
 using Microsoft.EntityFrameworkCore;
 using pos_system.Coupons;
 using pos_system.Admins;
@@ -8,6 +10,8 @@ using pos_system.Reservation;
 using pos_system.Services;
 using System.Data.Entity.ModelConfiguration.Conventions;
 using pos_system.Discounts;
+using pos_system.Workers;
+using pos_system.Roles;
 using pos_system.Payments;
 
 namespace pos_system.Contexts
@@ -22,7 +26,7 @@ namespace pos_system.Contexts
         public DbSet<ServiceModel> Services { get; set; }
         public DbSet<OrderModel> Orders { get; set; }
         public DbSet<OrderProductModel> OrderProducts { get; set; }
-        public DbSet<OrderServiceModel> OrderServices{ get; set;}
+        public DbSet<OrderServiceModel> OrderServices { get; set; }
         public DbSet<CustomerModel> Customers { get; set; }
         public DbSet<ReservationModel> Reservations { get; set; }
         public DbSet<CouponModel> Coupons { get; set; }
@@ -30,6 +34,9 @@ namespace pos_system.Contexts
         public DbSet<DiscountModel> Discounts { get; set; }
         public DbSet<DiscountProductModel> DiscountProducts { get; set; }
         public DbSet<DiscountServiceModel> DiscountServices { get; set; }
+        public DbSet<WorkerModel> Workers { get; set; }
+        public DbSet<RoleModel> Roles { get; set; }
+        public DbSet<WorkerRole> WorkerRoles { get; set; }
         public DbSet<PaymentModel> Payments { get; set; }
     }
 }

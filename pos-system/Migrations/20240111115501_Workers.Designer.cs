@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using pos_system.Contexts;
 
@@ -11,9 +12,10 @@ using pos_system.Contexts;
 namespace pos_system.Migrations
 {
     [DbContext(typeof(PosContext))]
-    partial class PosContextModelSnapshot : ModelSnapshot
+    [Migration("20240111115501_Workers")]
+    partial class Workers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -158,9 +160,6 @@ namespace pos_system.Migrations
                     b.Property<int?>("Status")
                         .HasColumnType("int");
 
-                    b.Property<decimal?>("Tip")
-                        .HasColumnType("decimal(18,2)");
-
                     b.HasKey("Id");
 
                     b.ToTable("Orders");
@@ -178,18 +177,17 @@ namespace pos_system.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("OrderId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<decimal?>("Price")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("ProductId")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("Quantity")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
 
                     b.ToTable("OrderProducts");
                 });
@@ -208,37 +206,20 @@ namespace pos_system.Migrations
                     b.Property<string>("OrderId")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("OrderModelId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<decimal?>("Price")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int?>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<string>("ServiceId")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("OrderModelId");
 
                     b.ToTable("OrderServices");
-                });
-
-            modelBuilder.Entity("pos_system.Payments.PaymentModel", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("OrderId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Type")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("pos_system.Products.ProductModel", b =>
@@ -418,7 +399,6 @@ namespace pos_system.Migrations
                 {
                     b.Navigation("WorkerRoles");
                 });
-
 #pragma warning restore 612, 618
         }
     }
