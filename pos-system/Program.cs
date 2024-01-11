@@ -9,6 +9,7 @@ using pos_system.Products;
 using pos_system.Reservation;
 using pos_system.Services;
 using System;
+using pos_system.Order.Tips;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +29,7 @@ builder.Services.AddScoped<IBillService, BillService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
+builder.Services.AddScoped<ITipService, TipService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -9,10 +9,8 @@ namespace pos_system.Order
     [ApiController]
     public class OrderController : ControllerBase
     {
-        private readonly PosContext _context;
         private readonly IOrderService _orderService;
-        public OrderController(PosContext context, IOrderService orderService) {
-            _context = context;
+        public OrderController(IOrderService orderService) {
             _orderService = orderService;
         }
 

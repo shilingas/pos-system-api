@@ -73,6 +73,7 @@ namespace pos_system.Bill
                 Products = billProducts,
                 Services = billServices,
                 Total = getTotal(billProducts, billServices, vatPercentage),
+                Tip = order.Tip,
             };
 
             return bill;
