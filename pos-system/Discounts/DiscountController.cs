@@ -10,15 +10,16 @@ namespace pos_system.Discounts
     [ApiController]
     public class DiscountController : Controller
     {
-        private readonly PosContext _context;
-        public DiscountController(PosContext _context)
+        private readonly IDiscountService discountService;
+        public DiscountController(IDiscountService _discountService)
         {
-            this._context = _context;
+            discountService = _discountService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<DiscountModel[]>> GetAllDiscounts() {
-            DiscountModel[] allDiscounts = await _context.Discounts.ToArrayAsync();
+        public async Task<ActionResult<DiscountModel[]>> GetAllDiscounts()
+        {
+            DiscountModel[] allDiscounts = await discountService.GetAllDiscounts();
 
             return allDiscounts;
         }
@@ -27,25 +28,17 @@ namespace pos_system.Discounts
         [Produces("application/json")]
         public async Task<ActionResult<DiscountModel>> CreateDiscount([FromBody] DiscountPostRequestModel discountModel)
         {
-            DiscountModel discount = new DiscountModel
-            {
-                Id = Guid.NewGuid().ToString(),
-                ValidUntilDateTime = discountModel.ValidUntilDateTime,
-                Percentage = discountModel.Percentage,
-            };
-
-            _context.Add(discount);
-            await _context.SaveChangesAsync();
-            return discount;
+            DiscountModel discount = await discountService.CreateDiscount(discountModel);
+            return Ok(discount);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<DiscountModel>> GetDiscountById(String id)
         {
-            DiscountModel? discount = new DiscountModel();
-            discount = await _context.Discounts.FindAsync(id);
-            if (discount != null) {
-                return discount;
+            DiscountModel? discount = await discountService.GetDiscountById(id);
+            if (discount != null)
+            {
+                return Ok(discount);
             }
             return NotFound();
         }
@@ -53,84 +46,60 @@ namespace pos_system.Discounts
         [HttpPut("{id}")]
         public async Task<ActionResult<DiscountModel?>> UpdateDiscount(String id, DiscountPostRequestModel discountModel)
         {
-            DiscountModel? discount = new DiscountModel();
-            discount = await _context.Discounts.FindAsync(id);
+            DiscountModel? discount = await discountService.UpdateDiscount(id, discountModel);
 
-            if (discount == null) {
+            if (discount == null)
+            {
                 return NotFound();
             }
-            if (discountModel.ValidUntilDateTime != null) {
-                discount.ValidUntilDateTime = discountModel.ValidUntilDateTime;
-            }
-            if (discountModel.Percentage != null) {
-                discount.Percentage = discountModel.Percentage;
-            }
-            await _context.SaveChangesAsync();
-            return discount;
+
+            return Ok(discount);
 
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteDiscount(String id)
         {
-            DiscountModel? discount = new DiscountModel();
-            discount = await _context.Discounts.FindAsync(id);
-            
-            if (discount == null) {
+            bool discount = await discountService.DeleteDiscount(id);
+
+            if (discount == false)
+            {
                 return NotFound();
             }
 
-            _context.Discounts.Remove(discount);
-            await _context.SaveChangesAsync();
-
-            return NotFound();
+            return Ok();
         }
 
         [HttpGet("{id}/products")]
         public async Task<ActionResult<List<DiscountProductModel>?>> GetDiscountedProducts(String id)
         {
-            List<DiscountProductModel>? products = new List<DiscountProductModel>();
-            products = await _context.DiscountProducts.Where(p => p.DiscountId == id).ToListAsync();
+            List<DiscountProductModel>? products = await discountService.GetDiscountedProducts(id);
 
-            return products;
+            return Ok(products);
         }
 
         [HttpPost("{id}/products")]
-        public async Task<ActionResult<DiscountProductModel>> AddProductToDiscount(String id, [FromBody] DiscountProductPostRequestModel discountRequestModel)
+        public async Task<ActionResult<DiscountProductModel?>> AddProductToDiscount(String id, [FromBody] DiscountProductPostRequestModel discountRequestModel)
         {
-            var existingProduct = await _context.Products.FindAsync(discountRequestModel.ProductId);
-            var existingDiscount = await _context.Discounts.FindAsync(id);
+            DiscountProductModel? product = await discountService.AddProductToDiscount(id, discountRequestModel);
 
-            if (existingProduct == null || existingDiscount == null) {
-                return NotFound();
+            if (product == null)
+            {
+                return BadRequest();
             }
 
-            DiscountProductModel product = new DiscountProductModel()
-            {
-                Id = Guid.NewGuid().ToString(),
-                DiscountId = id,
-                ProductId = discountRequestModel.ProductId,
-                Name = existingProduct.Name,
-            };
-
-            _context.Add(product);
-            await _context.SaveChangesAsync();
             return product;
         }
 
         [HttpDelete("{discountId}/products/{productId}")]
         public async Task<ActionResult> DeleteDiscountOnProduct(String discountId, String productId)
         {
-            DiscountProductModel? discountProduct = new DiscountProductModel();
-            discountProduct = await _context.DiscountProducts.FirstOrDefaultAsync(dp => dp.ProductId == productId && dp.DiscountId == discountId);
-        
-            if (discountProduct == null)
+            bool discountProduct = await discountService.DeleteDiscountOnProduct(discountId, productId);
+
+            if (discountProduct == false)
             {
                 return NotFound();
             }
-
-            _context.Remove(discountProduct);
-            await _context.SaveChangesAsync();
 
             return Ok();
         }
@@ -138,8 +107,7 @@ namespace pos_system.Discounts
         [HttpGet("{id}/services")]
         public async Task<ActionResult<List<DiscountServiceModel>?>> GetDiscountedServices(String id)
         {
-            List<DiscountServiceModel>? services = new List<DiscountServiceModel>();
-            services = await _context.DiscountServices.Where(s => s.DiscountId == id).ToListAsync();
+            List<DiscountServiceModel>? services = await discountService.GetDiscountedServices(id);
 
             return services;
         }
@@ -147,40 +115,25 @@ namespace pos_system.Discounts
         [HttpPost("{id}/services")]
         public async Task<ActionResult<DiscountServiceModel>> AddServiceToDiscount(String id, [FromBody] DiscountServicePostRequestModel discountRequestModel)
         {
-            var existingService = await _context.Services.FindAsync(discountRequestModel.ServiceId);
-            var existingDiscount = await _context.Discounts.FindAsync(id);
+            DiscountServiceModel? service = await discountService.AddServiceToDiscount(id, discountRequestModel);
 
-            if (existingService == null || existingDiscount == null)
+            if (service == null)
             {
-                return NotFound();
+                return BadRequest();
             }
 
-            DiscountServiceModel service = new DiscountServiceModel()
-            {
-                Id = Guid.NewGuid().ToString(),
-                DiscountId = id,
-                ServiceId = discountRequestModel.ServiceId,
-                Name = existingService.Name,
-            };
-
-            _context.Add(service);
-            await _context.SaveChangesAsync();
             return service;
         }
 
         [HttpDelete("{discountId}/services/{serviceId}")]
         public async Task<ActionResult> DeleteDiscountOnService(String discountId, String serviceId)
         {
-            DiscountServiceModel? discountService = new DiscountServiceModel();
-            discountService = await _context.DiscountServices.FirstOrDefaultAsync(ds => ds.ServiceId == serviceId && ds.DiscountId == discountId);
+            bool discountOnService = await discountService.DeleteDiscountOnService(discountId, serviceId);
 
-            if (discountService == null)
+            if (discountOnService == false)
             {
                 return NotFound();
             }
-
-            _context.Remove(discountService);
-            await _context.SaveChangesAsync();
 
             return Ok();
         }
