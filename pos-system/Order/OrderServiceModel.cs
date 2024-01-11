@@ -6,6 +6,7 @@ namespace pos_system.Order
     {
         [DisallowNull]
         public string? Id { get; set; }
+        public string? ServiceId { get; set; }
         public string? Name { get; set; }
         public float? Duration { get; set; }
         public decimal? Price { get; set; }

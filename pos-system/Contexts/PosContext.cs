@@ -12,6 +12,7 @@ using System.Data.Entity.ModelConfiguration.Conventions;
 using pos_system.Discounts;
 using pos_system.Workers;
 using pos_system.Roles;
+using pos_system.Payments;
 
 namespace pos_system.Contexts
 {
@@ -36,5 +37,6 @@ namespace pos_system.Contexts
         public DbSet<WorkerModel> Workers { get; set; }
         public DbSet<RoleModel> Roles { get; set; }
         public DbSet<WorkerRole> WorkerRoles { get; set; }
+        public DbSet<PaymentModel> Payments { get; set; }
     }
 }

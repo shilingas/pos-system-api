@@ -1,10 +1,18 @@
 using Microsoft.EntityFrameworkCore;
+using pos_system.Bill;
 using pos_system.Contexts;
+using pos_system.Discounts;
+using pos_system.Coupons;
+using pos_system.Customers;
 using pos_system.Order;
 using pos_system.Roles;
 using pos_system.Workers;
+using pos_system.Products;
+using pos_system.Reservation;
 using pos_system.Services;
 using System;
+using pos_system.Order.Tips;
+using pos_system.Payments;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,9 +25,17 @@ builder.Services.AddSwaggerGen();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<PosContext>(options => options.UseSqlServer(connectionString));
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<ICouponService, CouponService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IWorkerService, WorkerService>();
+builder.Services.AddScoped<IDiscountService, DiscountService>();
+builder.Services.AddScoped<IBillService, BillService>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IReservationService, ReservationService>();
+builder.Services.AddScoped<ITipService, TipService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

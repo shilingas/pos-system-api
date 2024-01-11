@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using pos_system.Contexts;
 
@@ -11,9 +12,10 @@ using pos_system.Contexts;
 namespace pos_system.Migrations
 {
     [DbContext(typeof(PosContext))]
-    partial class PosContextModelSnapshot : ModelSnapshot
+    [Migration("20240111125856_Payments")]
+    partial class Payments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -279,19 +281,6 @@ namespace pos_system.Migrations
                     b.ToTable("Reservations");
                 });
 
-            modelBuilder.Entity("pos_system.Roles.RoleModel", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Roles");
-                });
-
             modelBuilder.Entity("pos_system.Services.ServiceModel", b =>
                 {
                     b.Property<string>("Id")
@@ -311,54 +300,6 @@ namespace pos_system.Migrations
                     b.ToTable("Services");
                 });
 
-            modelBuilder.Entity("pos_system.WorkerRole", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("RoleId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("WorkerId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RoleId");
-
-                    b.HasIndex("WorkerId");
-
-                    b.ToTable("WorkerRoles");
-                });
-
-            modelBuilder.Entity("pos_system.Workers.WorkerModel", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Password")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Phone")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RoleId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Username")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Workers");
-                });
-
             modelBuilder.Entity("pos_system.Discounts.DiscountProductModel", b =>
                 {
                     b.HasOne("pos_system.Discounts.DiscountModel", null)
@@ -366,59 +307,10 @@ namespace pos_system.Migrations
                         .HasForeignKey("DiscountModelId");
                 });
 
-            modelBuilder.Entity("pos_system.Order.OrderProductModel", b =>
-                {
-                    b.HasOne("pos_system.Order.OrderModel", "Order")
-                        .WithMany("Products")
-                        .HasForeignKey("OrderId");
-
-                    b.Navigation("Order");
-                });
-
-            modelBuilder.Entity("pos_system.Order.OrderServiceModel", b =>
-                {
-                    b.HasOne("pos_system.Order.OrderModel", null)
-                        .WithMany("Services")
-                        .HasForeignKey("OrderModelId");
-                });
-
-            modelBuilder.Entity("pos_system.WorkerRole", b =>
-                {
-                    b.HasOne("pos_system.Roles.RoleModel", "Role")
-                        .WithMany("WorkerRoles")
-                        .HasForeignKey("RoleId");
-
-                    b.HasOne("pos_system.Workers.WorkerModel", "Worker")
-                        .WithMany("WorkerRoles")
-                        .HasForeignKey("WorkerId");
-
-                    b.Navigation("Role");
-
-                    b.Navigation("Worker");
-                });
-
             modelBuilder.Entity("pos_system.Discounts.DiscountModel", b =>
                 {
                     b.Navigation("Products");
                 });
-
-            modelBuilder.Entity("pos_system.Order.OrderModel", b =>
-                {
-                    b.Navigation("Products");
-
-                    b.Navigation("Services");
-                });
-
-            modelBuilder.Entity("pos_system.Roles.RoleModel", b =>
-                {
-                    b.Navigation("WorkerRoles");
-                });
-
-            modelBuilder.Entity("pos_system.Workers.WorkerModel", b =>
-                {
-                    b.Navigation("WorkerRoles");
-                });
-
 #pragma warning restore 612, 618
         }
     }
