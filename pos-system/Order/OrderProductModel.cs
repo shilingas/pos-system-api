@@ -12,9 +12,7 @@ namespace pos_system.Order
         public decimal? Price { get; set; }
         public string? Category { get; set; }
         public int? Quantity { get; set; }
-
         public string? OrderId { get; set; }
-        public virtual OrderModel? Order { get; set; }
 
     }
 }
