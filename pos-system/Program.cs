@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using pos_system.Bill;
 using pos_system.Contexts;
+using pos_system.Discounts;
 using pos_system.Coupons;
 using pos_system.Customers;
 using pos_system.Order;
@@ -22,6 +23,7 @@ builder.Services.AddDbContext<PosContext>(options => options.UseSqlServer(connec
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<ICouponService, CouponService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
+builder.Services.AddScoped<IDiscountService, DiscountService>();
 builder.Services.AddScoped<IBillService, BillService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IProductService, ProductService>();
