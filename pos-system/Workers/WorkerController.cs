@@ -3,6 +3,8 @@ using pos_system.Contexts;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using pos_system.Order;
+using pos_system.Roles;
+using pos_system.Migrations;
 
 namespace pos_system.Workers
 {
@@ -17,11 +19,58 @@ namespace pos_system.Workers
         }
 
         [HttpGet]
-        public async Task<WorkerModel[]> GetWorkers()
+        public async Task<ActionResult<IEnumerable<WorkerDto>>> GetWorkers()
         {
-            WorkerModel[] workers = await _context.Workers.ToArrayAsync();
+            var workers = await _context.Workers
+                                        .Include(w => w.WorkerRoles)
+                                        .ThenInclude(wr => wr.Role)
+                                        .ToListAsync();
 
-            return workers;
+            var workerDtos = workers.Select(worker => new WorkerDto
+            {
+                Id = worker.Id,
+                Name = worker.Name,
+                Email = worker.Email,
+                Phone = worker.Phone,
+                Username = worker.Username,
+                Roles = worker.WorkerRoles.Select(wr => new RoleDto
+                {
+                    Id = wr.Role.Id,
+                    Name = wr.Role.Name
+                }).ToList()
+            }).ToList();
+
+            return Ok(workerDtos);
+        }
+
+        [HttpGet("{workerId}")]
+        public async Task<ActionResult<WorkerDto>> GetWorkerById(string workerId)
+        {
+            var worker = await _context.Workers
+                                    .Include(w => w.WorkerRoles)
+                                    .ThenInclude(wr => wr.Role)
+                                    .SingleOrDefaultAsync(w => w.Id == workerId);
+
+            if (worker == null)
+            {
+                return NotFound("Toks darbuotojas nerastas!");
+            }
+
+            var workerDto = new WorkerDto
+            {
+                Id = worker.Id,
+                Name = worker.Name,
+                Email = worker.Email,
+                Phone = worker.Phone,
+                Username = worker.Username,
+                Roles = worker.WorkerRoles.Select(wr => new RoleDto
+                {
+                    Id = wr.Role.Id,
+                    Name = wr.Role.Name
+                }).ToList()
+            };
+
+            return Ok(workerDto);
         }
 
         [HttpPost]
@@ -124,5 +173,107 @@ namespace pos_system.Workers
             await _context.SaveChangesAsync();
             return Ok();
         }
+
+        [HttpPost("{workerId}/roles/{roleId}")]
+        public async Task<ActionResult<WorkerDto>> AddRoleToWorker(string workerId, string roleId)
+        {
+            WorkerModel? worker = await _context.Workers.FindAsync(workerId);
+            if (worker == null)
+            {
+                return NotFound("Darbuotojas su tokiu ID nerastas!");
+            }
+
+            RoleModel? role = await _context.Roles.FindAsync(roleId);
+            if (role == null)
+            {
+                return NotFound("Rolė su tokiu ID nerasta!");
+            }
+
+            if (await _context.WorkerRoles.AnyAsync(wr => wr.WorkerId == workerId && wr.RoleId == roleId))
+            {
+                return BadRequest("Šis darbuotojas jau turi šią rolę!");
+            }
+
+            WorkerRole workerRole = new WorkerRole
+            {
+                Id = Guid.NewGuid().ToString(),
+                WorkerId = workerId,
+                RoleId = roleId,
+            };
+
+            _context.WorkerRoles.Add(workerRole);
+
+            worker = await _context.Workers
+                            .Include(w => w.WorkerRoles)
+                            .ThenInclude(wr => wr.Role)
+                            .FirstOrDefaultAsync(w => w.Id == workerId);
+
+            WorkerDto workerDto = new WorkerDto
+            {
+                Id = worker.Id,
+                Name = worker.Name,
+                Email = worker.Email,
+                Phone = worker.Phone,
+                Username = worker.Username,
+                Roles = worker.WorkerRoles.Select(wr => new RoleDto
+                {
+                    Id = wr.Role.Id,
+                    Name = wr.Role.Name
+                }).ToList()
+            };
+
+            await _context.SaveChangesAsync();
+            return Ok(workerDto);
+
+
+        }
+
+        [HttpGet("{workerId}/roles")]
+        public async Task<ActionResult<List<RoleModel>>> GetRolesOfWorker(string workerId)
+        {
+            var worker = await _context.Workers
+                               .Include(w => w.WorkerRoles)
+                               .ThenInclude(wr => wr.Role)
+                               .FirstOrDefaultAsync(w => w.Id == workerId);
+
+            if (worker == null)
+            {
+                return NotFound("Toks darbuotojas nerastas!");
+            }
+
+            var roles = worker.WorkerRoles
+                              .Select(wr => wr.Role)
+                              .ToList();
+
+            return Ok(roles);
+        }
+
+        [HttpDelete("{workerId}/roles/{roleId}")]
+        public async Task<ActionResult> RemoveRole(string workerId, string roleId)
+        {
+            WorkerModel? worker = await _context.Workers.FindAsync(workerId);
+            if (worker == null)
+            {
+                return NotFound("Darbuotojas su tokiu ID nerastas");
+            }
+
+            RoleModel? role = await _context.Roles.FindAsync(roleId);
+            if (role == null)
+            {
+                return NotFound("Rolė su tokiu ID nerasta");
+            }
+
+            WorkerRole? workerrole = await _context.WorkerRoles.FirstOrDefaultAsync(wr => wr.WorkerId == workerId && wr.RoleId == roleId);
+            if (workerrole == null)
+            {
+                return NotFound("Pasirinkta rolė nėra priskirta pasirinktam vartotojui!");
+            }
+
+            _context.WorkerRoles.Remove(workerrole);
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
     }
 }
