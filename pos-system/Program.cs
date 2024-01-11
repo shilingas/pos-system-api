@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using pos_system.Contexts;
 using pos_system.Order;
+using pos_system.Roles;
+using pos_system.Workers;
 using pos_system.Services;
 using System;
 
@@ -16,6 +18,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<PosContext>(options => options.UseSqlServer(connectionString));
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IWorkerService, WorkerService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

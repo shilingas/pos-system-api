@@ -9,16 +9,16 @@ namespace pos_system.Roles
     [ApiController]
     public class RoleController : Controller
     {
-        private readonly PosContext _context;
-        public RoleController(PosContext _context)
+        private readonly IRoleService _roleService;
+        public RoleController(IRoleService roleService)
         {
-            this._context = _context;
+            _roleService = roleService;
         }
 
         [HttpGet]
         public async Task<RoleModel[]> GetRoles()
         {
-            RoleModel[] roles = await _context.Roles.ToArrayAsync();
+            RoleModel[] roles = await _roleService.GetRoles();
 
             return roles;
         }
@@ -26,14 +26,7 @@ namespace pos_system.Roles
         [HttpPost]
         public async Task<ActionResult<RoleModel>> AddRole(string name)
         {
-            RoleModel roleModel = new RoleModel
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = name,
-            };
-
-            _context.Roles.Add(roleModel);
-            await _context.SaveChangesAsync();
+            RoleModel roleModel = await _roleService.AddRole(name);
 
             return Ok(roleModel);
         }
@@ -41,42 +34,41 @@ namespace pos_system.Roles
         [HttpGet("{id}")]
         public async Task<ActionResult<RoleModel>> GetRoleById(string id)
         {
-            RoleModel? role = await _context.Roles.FindAsync(id);
+            RoleModel? role = await _roleService.GetRoleById(id);
 
             if (role == null)
             {
                 return NotFound();
             }
 
-            return role;
+            return Ok(role);
 
         }
 
         [HttpPut("{id}/{roleName}")]
         public async Task<ActionResult<RoleModel>> UpdateRole(string id, string roleName)
         {
-            RoleModel? role = await _context.Roles.FindAsync(id);
+            RoleModel? role = await _roleService.UpdateRole(id, roleName);
 
-            if (role == null) { return NotFound(); }
-
-            if (roleName != null)
-            {
-                role.Name = roleName;
+            if (role == null) {
+                return NotFound();
             }
 
-            await _context.SaveChangesAsync();
             return Ok(role);
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteRole(string id)
         {
-            RoleModel? role = await _context.Roles.FindAsync(id);
-            if (role == null) { return NotFound(); }
+            bool role = await _roleService.DeleteRole(id);
 
-            _context.Roles.Remove(role);
-            await _context.SaveChangesAsync();
-            return Ok();
+            if (role == false) {
+                return NotFound();
+            } else
+            {
+                return Ok();
+            }
+
         }
 
     }
