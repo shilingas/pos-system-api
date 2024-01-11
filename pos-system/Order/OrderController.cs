@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using pos_system.Contexts;
 using Microsoft.EntityFrameworkCore;
+using pos_system.Products;
 
 namespace pos_system.Order
 {
@@ -78,9 +79,9 @@ namespace pos_system.Order
         }
 
         [HttpGet("{orderId}/products")]
-        public async Task<List<OrderProductModel>> GettAllProducts(string orderId)
+        public async Task<List<OrderProductModel?>> GettAllProducts(string orderId)
         {
-            return await _orderService.GettAllProducts(orderId);
+            return await _orderService.GetAllProducts(orderId);
         }
 
         [HttpPost("{orderId}/products")]
@@ -141,7 +142,7 @@ namespace pos_system.Order
         [HttpGet("{orderId}/services")]
         public async Task<List<OrderServiceModel>> GettAllServices(string orderId)
         {
-            return await _orderService.GettAllServices(orderId);
+            return await _orderService.GetAllServices(orderId);
         }
 
         [HttpPost("{orderId}/services")]

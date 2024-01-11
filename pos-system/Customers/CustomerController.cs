@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using pos_system.Contexts;
+using pos_system.Coupons;
+using pos_system.Services;
 
 namespace pos_system.Customers
 {
@@ -10,30 +12,27 @@ namespace pos_system.Customers
     public class CustomerController : Controller
     {
         private readonly PosContext _context;
-        public CustomerController(PosContext _context)
+        private readonly ICustomerService _customerService;
+        public CustomerController(PosContext _context, ICustomerService customerService)
         {
             this._context = _context;
+            _customerService = customerService;
         }
         [HttpPost]
         [Produces("application/json")]
         public async Task<ActionResult<CustomerModel>> CreateCustomer([FromBody] CustomerPostRequestModel customerModel)
         {
-            CustomerModel customer = new CustomerModel
+            CustomerModel? coupon = await _customerService.CreateCustomer(customerModel);
+            if (coupon == null)
             {
-                Id = Guid.NewGuid().ToString(),
-                Name = customerModel.Name,
-                Email = customerModel.Email,
-                Phone = customerModel.Phone,
-            };
-            _context.Add(customer);
-            await _context.SaveChangesAsync();
-            return customer;
+                return BadRequest();
+            }
+            return Ok(coupon);
         }
         [HttpGet("{id}")]
         public async Task<ActionResult<CustomerModel>?> GetCustomer(string id)
         {
-            CustomerModel? customer = new CustomerModel();
-            customer = await _context.Customers.FindAsync(id);
+            CustomerModel? customer = await _customerService.GetCustomer(id);
             if (customer != null)
             {
                 return customer;
@@ -46,55 +45,30 @@ namespace pos_system.Customers
         [HttpGet]
         public async Task<CustomerModel[]> GetAllCustomers()
         {
-            CustomerModel[] customers = new CustomerModel[0];
-            if (_context != null)
-            {
-                customers = await _context.Customers.ToArrayAsync();
-            }
-
-            return customers;
+            return await _customerService.GetAllCustomers();
         }
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteCustomer(string id)
         {
-            var customer = await _context.Customers.FindAsync(id);
-            if (customer == null)
+            bool isDeleted = await _customerService.DeleteCustomer(id);
+            if (isDeleted)
+            {
+                return NoContent();
+            }
+            return NotFound();
+        }
+        [HttpPut("{customerId}")]
+        public async Task<ActionResult<CustomerModel>> UpdateCustomer(string customerId, CustomerPostRequestModel customerModel)
+        {
+            CustomerModel? customer = await _customerService.UpdateCustomer(customerId, customerModel);
+            if (customer != null)
+            {
+                return Ok(customer);
+            }
+            else
             {
                 return NotFound();
             }
-
-            _context.Customers.Remove(customer);
-            await _context.SaveChangesAsync();
-
-            return Ok();
-        }
-        [HttpPut("{customerId}")]
-        public async Task<CustomerModel?> UpdateCustomer(string customerId, CustomerPostRequestModel customerModel)
-        {
-            CustomerModel? updated = new CustomerModel();
-            if (_context != null)
-            {
-                updated = await _context.Customers.SingleOrDefaultAsync(customer => customer.Id == customerId);
-                if (updated == null)
-                {
-                    return null;
-                }
-                if (customerModel.Name != null)
-                {
-                    updated.Name = customerModel.Name;
-                }
-                if (customerModel.Email != null)
-                {
-                    updated.Email = customerModel.Email;
-                }
-                if (customerModel.Phone != null)
-                {
-                    updated.Phone = customerModel.Phone;
-                }
-                await _context.SaveChangesAsync();
-                return updated;
-            }
-            return null;
 
         }
     }

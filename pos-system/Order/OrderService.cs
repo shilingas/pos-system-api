@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using pos_system.Contexts;
 using Microsoft.EntityFrameworkCore;
+using pos_system.Products;
 
 namespace pos_system.Order
 {
@@ -89,7 +90,7 @@ namespace pos_system.Order
             return true;
         }
 
-        public async Task<List<OrderProductModel>> GettAllProducts(string orderId)
+        public async Task<List<OrderProductModel?>> GetAllProducts(string orderId)
         {
             var orderProducts = await _context.OrderProducts.Where(o => o.OrderId == orderId).ToListAsync();
             return orderProducts;
@@ -97,6 +98,14 @@ namespace pos_system.Order
 
         public async Task<OrderProductModel?> AddProductToOrder(string orderId, OrderProductPostRequestModel newProduct)
         {
+            var existingOrderProduct = await _context.OrderProducts.FirstOrDefaultAsync(o => o.OrderId == orderId && o.ProductId == newProduct.ProductId);
+            if (existingOrderProduct != null)
+            {
+                existingOrderProduct.Quantity += newProduct.Quantity;
+                await _context.SaveChangesAsync();
+                return existingOrderProduct;
+            }
+
             var product = await _context.Products.FindAsync(newProduct.ProductId);
             if (product == null)
             {
@@ -105,7 +114,8 @@ namespace pos_system.Order
 
             var orderProduct = new OrderProductModel
             {
-                Id = product.Id,
+                Id = Guid.NewGuid().ToString(),
+                ProductId = product.Id,
                 Name = product.Name,
                 Category = product.CategoryType,
                 Price = product.Price,
@@ -121,7 +131,7 @@ namespace pos_system.Order
 
         public async Task<OrderProductModel?> GetProductOfAnOrder(string orderId, string productId)
         {
-            var orderProduct = await _context.OrderProducts.FirstOrDefaultAsync(o => o.OrderId == orderId && o.Id == productId);
+            var orderProduct = await _context.OrderProducts.FirstOrDefaultAsync(o => o.OrderId == orderId && o.ProductId == productId);
             if (orderProduct == null)
             {
                 return null;
@@ -131,7 +141,7 @@ namespace pos_system.Order
 
         public async Task<OrderProductModel?> UpdateOrderProduct(string orderId, string productId, OrderProductPostRequestModel newOrder)
         {
-            var orderProduct = await _context.OrderProducts.FirstOrDefaultAsync(o => o.OrderId == orderId && o.Id == productId);
+            var orderProduct = await _context.OrderProducts.FirstOrDefaultAsync(o => o.OrderId == orderId && o.ProductId == productId);
 
             if (orderProduct != null)
             {
@@ -145,7 +155,7 @@ namespace pos_system.Order
 
         public async Task<bool> DeleteProductFromOrder(string orderId, string productId)
         {
-            var orderProduct = await _context.OrderProducts.FirstOrDefaultAsync(o => o.OrderId == orderId && o.Id == productId);
+            var orderProduct = await _context.OrderProducts.FirstOrDefaultAsync(o => o.OrderId == orderId && o.ProductId == productId);
             if (orderProduct == null)
             {
                 return false;
@@ -157,7 +167,7 @@ namespace pos_system.Order
             return true;
         }
 
-        public async Task<List<OrderServiceModel>> GettAllServices(string orderId)
+        public async Task<List<OrderServiceModel>> GetAllServices(string orderId)
         {
             var orderServices = await _context.OrderServices
                                          .Where(o => o.OrderId == orderId).ToListAsync();
@@ -175,7 +185,8 @@ namespace pos_system.Order
 
             var orderService = new OrderServiceModel
             {
-                Id = service.Id,
+                Id = Guid.NewGuid().ToString(),
+                ServiceId = service.Id,
                 Name = service.Name,
                 Price = service.Price,
                 Quantity = orderServicePostRequest.Quantity,
@@ -190,7 +201,7 @@ namespace pos_system.Order
 
         public async Task<OrderServiceModel?> GetServiceOfAnOrder(string orderId, string serviceId)
         {
-            OrderServiceModel? orderService = await _context.OrderServices.FirstOrDefaultAsync(o => o.OrderId == orderId && o.Id == serviceId);
+            OrderServiceModel? orderService = await _context.OrderServices.FirstOrDefaultAsync(o => o.OrderId == orderId && o.ServiceId == serviceId);
             if (orderService == null)
             {
                 return null;
@@ -205,7 +216,7 @@ namespace pos_system.Order
                 return null;
             }
 
-            OrderServiceModel? orderService = await _context.OrderServices.FirstOrDefaultAsync(o => o.OrderId == orderId && o.Id == serviceId);
+            OrderServiceModel? orderService = await _context.OrderServices.FirstOrDefaultAsync(o => o.OrderId == orderId && o.ServiceId == serviceId);
 
             if (orderService != null)
             {
@@ -219,7 +230,7 @@ namespace pos_system.Order
 
         public async Task<bool> DeleteServiceFromOrder(string orderId, string serviceId)
         {
-            var orderService = await _context.OrderServices.FirstOrDefaultAsync(o => o.OrderId == orderId && o.Id == serviceId);
+            var orderService = await _context.OrderServices.FirstOrDefaultAsync(o => o.OrderId == orderId && o.ServiceId == serviceId);
             if (orderService == null)
             {
                 return false;

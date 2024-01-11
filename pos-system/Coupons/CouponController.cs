@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using pos_system.Contexts;
 using Microsoft.EntityFrameworkCore;
-using pos_system.Customers;
+using pos_system.Services;
 
 namespace pos_system.Coupons
 {
@@ -9,31 +9,27 @@ namespace pos_system.Coupons
     [ApiController]
     public class CouponController : Controller
     {
-        private readonly PosContext _context;
-        public CouponController(PosContext _context)
+        private readonly ICouponService _couponService;
+        public CouponController(PosContext _context, ICouponService couponService)
         {
-            this._context = _context;
+            _couponService = couponService;
         }
         [HttpPost]
         [Produces("application/json")]
         public async Task<ActionResult<CouponModel>> CreateCoupon([FromBody] CouponPostRequestModel couponModel)
         {
-            CouponModel customer = new CouponModel
+
+            CouponModel? coupon = await _couponService.CreateCoupon(couponModel);
+            if (coupon == null)
             {
-                Id = Guid.NewGuid().ToString(),
-                Discount = couponModel.Discount,
-                ValidUntilDateTime = couponModel.ValidUntilDateTime,
-                Status = couponModel.Status,
-            };
-            _context.Add(customer);
-            await _context.SaveChangesAsync();
-            return customer;
+                return BadRequest();
+            }
+            return Ok(coupon);
         }
         [HttpGet("{id}")]
         public async Task<ActionResult<CouponModel>?> GetCoupon(string id)
         {
-            CouponModel? coupon = new CouponModel();
-            coupon = await _context.Coupons.FindAsync(id);
+            CouponModel? coupon = await _couponService.GetCoupon(id);
             if (coupon != null)
             {
                 return coupon;
@@ -46,55 +42,30 @@ namespace pos_system.Coupons
         [HttpGet]
         public async Task<CouponModel[]> GetAllCoupons()
         {
-            CouponModel[] coupons = new CouponModel[0];
-            if (_context != null)
-            {
-                coupons = await _context.Coupons.ToArrayAsync();
-            }
-
-            return coupons;
+            return await _couponService.GetAllCoupons();
         }
         [HttpDelete("{id}")]
-        public async Task<bool> DeleteCoupon(string id)
+        public async Task<IActionResult> DeleteCoupon(string id)
         {
-            var coupon = await _context.Coupons.FindAsync(id);
-            if (coupon == null)
+            bool isDeleted = await _couponService.DeleteCoupon(id);
+            if (isDeleted)
             {
-                return false;
+                return NoContent();
             }
-
-            _context.Coupons.Remove(coupon);
-            await _context.SaveChangesAsync();
-
-            return true;
+            return NotFound();
         }
         [HttpPut("{couponId}")]
-        public async Task<CouponModel?> UpdateCoupon(string couponId, CouponPostRequestModel couponModel)
+        public async Task<ActionResult<ServiceModel>> UpdateCoupon(string couponId, CouponPostRequestModel couponModel)
         {
-            CouponModel? updated = new CouponModel();
-            if (_context != null)
+            CouponModel? coupon = await _couponService.UpdateCoupon(couponId, couponModel);
+            if (coupon != null)
             {
-                updated = await _context.Coupons.SingleOrDefaultAsync(coupon => coupon.Id == couponId);
-                if (updated == null)
-                {
-                    return null;
-                }
-                if (couponModel.Discount != null)
-                {
-                    updated.Discount = couponModel.Discount;
-                }
-                if (couponModel.ValidUntilDateTime != null)
-                {
-                    updated.ValidUntilDateTime = couponModel.ValidUntilDateTime;
-                }
-                if (couponModel.Status != null)
-                {
-                    updated.Status = couponModel.Status;
-                }
-                await _context.SaveChangesAsync();
-                return updated;
+                return Ok(coupon);
             }
-            return null;
+            else
+            {
+                return NotFound();
+            }
 
         }
     }
