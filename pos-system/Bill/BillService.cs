@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using pos_system.Customers;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
+using pos_system.Discounts;
 
 namespace pos_system.Bill
 {
@@ -33,22 +34,36 @@ namespace pos_system.Bill
             }
 
             List<OrderProductModel> orderProducts = await _context.OrderProducts.Where(o => o.OrderId == orderId).ToListAsync();
-            List<BillProductModel> billProducts = orderProducts.Select(orderProduct => new BillProductModel
+            List<BillProductModel> billProducts = new List<BillProductModel>();
+
+            foreach (var product in orderProducts)
             {
-                Name = orderProduct.Name,
-                Price = orderProduct.Price,
-                Vat = orderProduct.Price * vatPercentage,
-                Quantity = orderProduct.Quantity
-            }).ToList();
+                decimal? discountedPrice = await CalculateDiscountedProductPrice(product);
+
+                billProducts.Add(new BillProductModel
+                {
+                    Name = product.Name,
+                    Price = discountedPrice,
+                    Vat = discountedPrice * vatPercentage,
+                    Quantity = product.Quantity
+                });
+            }
 
             List<OrderServiceModel> orderServices = await _context.OrderServices.Where(o => o.OrderId == orderId).ToListAsync();
-            List<BillServiceModel> billServices = orderServices.Select(orderService => new BillServiceModel
+            List<BillServiceModel> billServices = new List<BillServiceModel>();
+
+            foreach (var service in orderServices)
             {
-                Name = orderService.Name,
-                Price = orderService.Price,
-                Vat = orderService.Price * vatPercentage,
-                Quantity = orderService.Quantity
-            }).ToList();
+                decimal? discountedPrice = await CalculateDiscountedServicePrice(service);
+
+                billServices.Add(new BillServiceModel
+                {
+                    Name = service.Name,
+                    Price = discountedPrice,
+                    Vat = discountedPrice * vatPercentage,
+                    Quantity = service.Quantity
+                });
+            }
 
             BillModel bill = new BillModel()
             {
@@ -57,13 +72,57 @@ namespace pos_system.Bill
                 GeneratedDateTime = DateTime.Now,
                 Products = billProducts,
                 Services = billServices,
-                Total = getTotal(billProducts, billServices),
+                Total = getTotal(billProducts, billServices, vatPercentage),
             };
 
             return bill;
         }
 
-        private decimal? getTotal (List<BillProductModel> billProducts, List<BillServiceModel> billServices)
+        private async Task<decimal?> CalculateDiscountedProductPrice(OrderProductModel product)
+        {
+            List<DiscountProductModel> discountProductEntries = await _context.DiscountProducts
+                .Where(d => d.ProductId == product.ProductId)
+                .ToListAsync();
+
+            decimal discountMultiplier = 1m;
+
+            foreach (var discountProduct in discountProductEntries)
+            {
+                var discount = await _context.Discounts
+                    .FirstOrDefaultAsync(d => d.Id == discountProduct.DiscountId && (d.ValidUntilDateTime == null || d.ValidUntilDateTime >= DateTime.Now));
+
+                if (discount != null)
+                {
+                    discountMultiplier *= 1 - (decimal)(discount.Percentage ?? 0);
+                }
+            }
+
+            return product.Price * discountMultiplier;
+        }
+
+        private async Task<decimal?> CalculateDiscountedServicePrice(OrderServiceModel service)
+        {
+            List<DiscountServiceModel> discountServiceEntries = await _context.DiscountServices
+                .Where(d => d.ServiceId == service.ServiceId)
+                .ToListAsync();
+
+            decimal discountMultiplier = 1m;
+
+            foreach (var discountProduct in discountServiceEntries)
+            {
+                var discount = await _context.Discounts
+                    .FirstOrDefaultAsync(d => d.Id == discountProduct.DiscountId && (d.ValidUntilDateTime == null || d.ValidUntilDateTime >= DateTime.Now));
+
+                if (discount != null)
+                {
+                    discountMultiplier *= 1 - (decimal)(discount.Percentage ?? 0);
+                }
+            }
+
+            return service.Price * discountMultiplier;
+        }
+
+        private decimal? getTotal(List<BillProductModel> billProducts, List<BillServiceModel> billServices, decimal vatPercentage)
         {
             decimal? total = 0;
             foreach (var product in billProducts)
@@ -75,7 +134,7 @@ namespace pos_system.Bill
                 total += service.Price * service.Quantity;
             }
 
-            return total;
+            return total * (1 + vatPercentage);
         }
     }
 }
