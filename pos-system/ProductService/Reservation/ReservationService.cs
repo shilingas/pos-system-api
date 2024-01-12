@@ -12,12 +12,31 @@ namespace pos_system.ProductService.Reservation
         }
         public async Task<ReservationModel?> CreateReservation(ReservationPostRequestModel reservationModel)
         {
+            var service = _context.Services.FirstOrDefault(s => s.Id == reservationModel.ServiceId);
+            if (service == null)
+            {
+                return null;
+            }
+
+            TimeSpan timeSpan = new TimeSpan();
+            if (service.Duration.HasValue)
+            {
+                timeSpan = TimeSpan.FromMinutes(service.Duration.Value);
+            }
+            else
+            {
+                timeSpan = TimeSpan.Zero;
+            }
+
             ReservationModel reservation = new ReservationModel
             {
                 Id = Guid.NewGuid().ToString(),
                 OrderId = reservationModel.OrderId,
                 ServiceId = reservationModel.ServiceId,
-                StartDateTime = reservationModel.StartDateTime,
+                WorkerId = reservationModel.WorkerId,
+                CustomerId = reservationModel.CustomerId, 
+                StartDateTime = DateTime.Parse(reservationModel.StartDateTime),
+                Duration = timeSpan,
             };
             _context.Add(reservation);
             await _context.SaveChangesAsync();
@@ -83,12 +102,39 @@ namespace pos_system.ProductService.Reservation
                 }
                 if (reservationModel.StartDateTime != null)
                 {
-                    updated.StartDateTime = reservationModel.StartDateTime;
+                    updated.StartDateTime = DateTime.Parse(reservationModel.StartDateTime);
                 }
                 await _context.SaveChangesAsync();
                 return updated;
             }
             return null;
+        }
+
+        public async Task<IEnumerable<TimeSpan>> GetFreeTimesOfWorker(string workerId, DateTime date)
+        {
+            var workDayStart = new TimeSpan(9, 0, 0);
+            var workDayEnd = new TimeSpan(17, 0, 0);
+
+            var reservations = await _context.Reservations
+                                        .Where(r => r.WorkerId == workerId && r.StartDateTime.Value.Date == date.Date)
+                                        .ToListAsync();
+
+            var allSlots = new List<TimeSpan>();
+            for (var time = workDayStart; time < workDayEnd; time = time.Add(TimeSpan.FromMinutes(30)))
+            {
+                allSlots.Add(time);
+            }
+
+            foreach (var reservation in reservations)
+            {
+                // Assuming reservation.Duration is a TimeSpan
+                var reservationEnd = reservation.StartDateTime.Value.TimeOfDay.Add(reservation.Duration.Value);
+
+                // Remove all slots that overlap with this reservation
+                allSlots.RemoveAll(slot => slot >= reservation.StartDateTime.Value.TimeOfDay && slot < reservationEnd);
+            }
+
+            return allSlots;
         }
     }
 }

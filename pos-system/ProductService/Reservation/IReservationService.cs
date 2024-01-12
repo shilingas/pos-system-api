@@ -9,5 +9,6 @@ namespace pos_system.ProductService.Reservation
         Task<ReservationModel?> GetReservation(string id);
         Task<ReservationModel?> UpdateReservation(string reservationId, ReservationPostRequestModel reservationModel);
         Task<bool> DeleteReservation(string id);
+        Task<IEnumerable<TimeSpan>> GetFreeTimesOfWorker(string workerId, DateTime date);
     }
 }

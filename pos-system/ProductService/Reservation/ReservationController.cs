@@ -72,5 +72,17 @@ namespace pos_system.ProductService.Reservation
             }
 
         }
+
+        [HttpGet("{workerId}/{date}")]
+        public async Task<ActionResult<IEnumerable<TimeSpan>>> GetFreeTimesOfWorker(string workerId, DateTime date)
+        {
+            var freeTimes = await _reservationService.GetFreeTimesOfWorker(workerId, date);
+            if (freeTimes == null)
+            {
+                return BadRequest();
+            }
+            return Ok(freeTimes);
+
+        }
     }
 }
