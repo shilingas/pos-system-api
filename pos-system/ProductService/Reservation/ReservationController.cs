@@ -23,11 +23,30 @@ namespace pos_system.ProductService.Reservation
         [Produces("application/json")]
         public async Task<ActionResult<ReservationModel>> CreateReservation([FromBody] ReservationPostRequestModel reservationPostRequest)
         {
-            ReservationModel? coupon = await _reservationService.CreateReservation(reservationPostRequest);
-            if (coupon == null)
+            int validation = _reservationService.validateCreation(reservationPostRequest);
+
+            if (validation == 0)
             {
-                return BadRequest();
+                return BadRequest("Tokia paslauga neegzistuoja");
             }
+            else if (validation == 1)
+            {
+                return BadRequest("Rezervacijos laiko minutės gali būti tik 00 arba 30");
+            }
+            else if (validation == 2)
+            {
+                return BadRequest("Šis laikas jau rezervuotas");
+            }
+            else if (validation == 3)
+            {
+                return BadRequest("Datos ir laiko formatas netinkamas");
+            }
+            else if (validation == 4)
+            {
+                return BadRequest("Toks darbuotojas neegzistuoja");
+            }
+
+            ReservationModel? coupon = await _reservationService.CreateReservation(reservationPostRequest);
             return Ok(coupon);
         }
         [HttpGet("{id}")]
@@ -70,6 +89,18 @@ namespace pos_system.ProductService.Reservation
             {
                 return NotFound();
             }
+
+        }
+
+        [HttpGet("{workerId}/{date}")]
+        public async Task<ActionResult<IEnumerable<TimeSpan>>> GetFreeTimesOfWorker(string workerId, DateTime date)
+        {
+            var freeTimes = await _reservationService.GetFreeTimesOfWorker(workerId, date);
+            if (freeTimes == null)
+            {
+                return BadRequest();
+            }
+            return Ok(freeTimes);
 
         }
     }
