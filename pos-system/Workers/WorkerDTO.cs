@@ -1,4 +1,4 @@
-﻿using pos_system.Roles;
+﻿using pos_system.Workers.Roles;
 
 namespace pos_system.Workers
 {

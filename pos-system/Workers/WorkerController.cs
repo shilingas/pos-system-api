@@ -3,9 +3,9 @@ using pos_system.Contexts;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using pos_system.Order;
-using pos_system.Roles;
 using pos_system.Migrations;
 using System.Data.Entity;
+using pos_system.Workers.Roles;
 
 namespace pos_system.Workers
 {

@@ -1,19 +1,19 @@
 using Microsoft.EntityFrameworkCore;
-using pos_system.Bill;
 using pos_system.Contexts;
-using pos_system.Discounts;
-using pos_system.Coupons;
 using pos_system.Customers;
 using pos_system.Order;
-using pos_system.Roles;
 using pos_system.Workers;
-using pos_system.Products;
-using pos_system.Reservation;
-using pos_system.Services;
 using System;
 using pos_system.Order.Tips;
-using pos_system.Payments;
-using pos_system.Admins;
+using pos_system.Workers.Roles;
+using pos_system.Customers.Coupons;
+using pos_system.Order.Payments;
+using pos_system.Order.Bill;
+using pos_system.Management.Admins;
+using pos_system.ProductService.Products;
+using pos_system.ProductService.Services;
+using pos_system.ProductService.Discounts;
+using pos_system.ProductService.Reservation;
 
 var builder = WebApplication.CreateBuilder(args);
 

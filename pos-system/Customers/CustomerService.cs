@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using pos_system.Contexts;
-using pos_system.Coupons;
+using pos_system.Customers.Coupons;
 
 namespace pos_system.Customers
 {

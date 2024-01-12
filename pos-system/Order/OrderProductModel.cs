@@ -1,4 +1,4 @@
-﻿using pos_system.Products;
+﻿using pos_system.ProductService.Products;
 using System.Diagnostics.CodeAnalysis;
 
 namespace pos_system.Order

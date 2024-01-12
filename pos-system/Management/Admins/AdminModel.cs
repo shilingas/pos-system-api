@@ -1,10 +1,8 @@
-﻿using pos_system.Order;
-using pos_system.Workers.Roles;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
-namespace pos_system.Workers
+namespace pos_system.Management.Admins
 {
-    public class WorkerModel
+    public class AdminModel
     {
         [DisallowNull]
         public string? Id { get; set; }
@@ -13,6 +11,5 @@ namespace pos_system.Workers
         public string? Phone { get; set; }
         public string? Password { get; set; }
         public string? Username { get; set; }
-        public ICollection<WorkerRole> WorkerRoles { get; set; } = new List<WorkerRole>();
     }
 }
