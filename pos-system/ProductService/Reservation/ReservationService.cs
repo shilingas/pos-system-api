@@ -20,9 +20,9 @@ namespace pos_system.ProductService.Reservation
 
             TimeSpan duration = service.Duration.HasValue ? TimeSpan.FromMinutes(service.Duration.Value) : TimeSpan.Zero;
             DateTime startDateTime = DateTime.Parse(reservationModel.StartDateTime).AddHours(-2);
+            startDateTime = startDateTime.AddSeconds(-startDateTime.Second).AddMilliseconds(-startDateTime.Millisecond);
             DateTime endDateTime = startDateTime.Add(duration);
 
-            // Fetch the reservations into memory before performing the DateTime calculations
             var reservations = await _context.Reservations
                 .Where(r => r.WorkerId == reservationModel.WorkerId)
                 .ToListAsync();
@@ -136,10 +136,9 @@ namespace pos_system.ProductService.Reservation
 
             foreach (var reservation in reservations)
             {
-                // Assuming reservation.Duration is a TimeSpan
                 var reservationEnd = reservation.StartDateTime.Value.TimeOfDay.Add(reservation.Duration.Value);
+                reservationEnd = reservationEnd.Add(-TimeSpan.FromMinutes(1));
 
-                // Remove all slots that overlap with this reservation
                 allSlots.RemoveAll(slot => slot >= reservation.StartDateTime.Value.TimeOfDay && slot < reservationEnd);
             }
 
