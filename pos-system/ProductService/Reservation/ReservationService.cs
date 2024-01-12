@@ -12,20 +12,28 @@ namespace pos_system.ProductService.Reservation
         }
         public async Task<ReservationModel?> CreateReservation(ReservationPostRequestModel reservationModel)
         {
-            var service = _context.Services.FirstOrDefault(s => s.Id == reservationModel.ServiceId);
+            var service = await _context.Services.FirstOrDefaultAsync(s => s.Id == reservationModel.ServiceId);
             if (service == null)
             {
                 return null;
             }
 
-            TimeSpan timeSpan = new TimeSpan();
-            if (service.Duration.HasValue)
+            TimeSpan duration = service.Duration.HasValue ? TimeSpan.FromMinutes(service.Duration.Value) : TimeSpan.Zero;
+            DateTime startDateTime = DateTime.Parse(reservationModel.StartDateTime).AddHours(-2);
+            DateTime endDateTime = startDateTime.Add(duration);
+
+            // Fetch the reservations into memory before performing the DateTime calculations
+            var reservations = await _context.Reservations
+                .Where(r => r.WorkerId == reservationModel.WorkerId)
+                .ToListAsync();
+
+            var isWorkerBooked =  reservations.Any(r =>
+                r.StartDateTime < endDateTime &&
+                r.StartDateTime.Value.Add(r.Duration.Value) > startDateTime);
+
+            if (isWorkerBooked)
             {
-                timeSpan = TimeSpan.FromMinutes(service.Duration.Value);
-            }
-            else
-            {
-                timeSpan = TimeSpan.Zero;
+                return null;
             }
 
             ReservationModel reservation = new ReservationModel
@@ -34,10 +42,11 @@ namespace pos_system.ProductService.Reservation
                 OrderId = reservationModel.OrderId,
                 ServiceId = reservationModel.ServiceId,
                 WorkerId = reservationModel.WorkerId,
-                CustomerId = reservationModel.CustomerId, 
-                StartDateTime = DateTime.Parse(reservationModel.StartDateTime),
-                Duration = timeSpan,
+                CustomerId = reservationModel.CustomerId,
+                StartDateTime = startDateTime,
+                Duration = duration
             };
+
             _context.Add(reservation);
             await _context.SaveChangesAsync();
             return reservation;
