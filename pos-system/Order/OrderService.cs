@@ -177,6 +177,14 @@ namespace pos_system.Order
 
         public async Task<OrderServiceModel?> AddServiceToOrder(string orderId, OrderServicePostRequestModel orderServicePostRequest)
         {
+            var existingOrderService = await _context.OrderServices.FirstOrDefaultAsync(o => o.OrderId == orderId && o.ServiceId == orderServicePostRequest.ServicetId);
+            if (existingOrderService != null)
+            {
+                existingOrderService.Quantity += orderServicePostRequest.Quantity;
+                await _context.SaveChangesAsync();
+                return existingOrderService;
+            }
+
             var service = await _context.Services.FindAsync(orderServicePostRequest.ServicetId);
             if (service == null)
             {
