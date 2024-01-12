@@ -21,6 +21,12 @@ namespace pos_system.ProductService.Reservation
             TimeSpan duration = service.Duration.HasValue ? TimeSpan.FromMinutes(service.Duration.Value) : TimeSpan.Zero;
             DateTime startDateTime = DateTime.Parse(reservationModel.StartDateTime).AddHours(-2);
             startDateTime = startDateTime.AddSeconds(-startDateTime.Second).AddMilliseconds(-startDateTime.Millisecond);
+
+            if (startDateTime.Minute != 0 && startDateTime.Minute != 30)
+            {
+                return null;
+            }
+
             DateTime endDateTime = startDateTime.Add(duration);
 
             var reservations = await _context.Reservations
