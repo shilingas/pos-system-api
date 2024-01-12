@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using pos_system.Contexts;
 using Microsoft.EntityFrameworkCore;
-using pos_system.Products;
+using pos_system.ProductService.Products;
 
 namespace pos_system.Order
 {

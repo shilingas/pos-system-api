@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using pos_system.Contexts;
-using pos_system.Coupons;
-using pos_system.Services;
+using pos_system.Customers.Coupons;
+using pos_system.ProductService.Services;
 
 namespace pos_system.Customers
 {
