@@ -11,32 +11,27 @@ namespace pos_system.Admins
     public class AdminController : ControllerBase
     {
         private readonly PosContext _context;
-        public AdminController(PosContext _context)
+        private readonly IAdminService _adminService;
+        public AdminController(PosContext _context, IAdminService adminService)
         {
             this._context = _context;
+            _adminService = adminService;
         }
         [HttpPost]
         [Produces("application/json")]
         public async Task<ActionResult<AdminModel>> CreateAdmin([FromBody] AdminPostRequestModel adminModel)
         {
-            AdminModel admin = new AdminModel
+            AdminModel? admin = await _adminService.CreateAdmin(adminModel);
+            if (admin == null)
             {
-                Id = Guid.NewGuid().ToString(),
-                Name = adminModel.Name,
-                Email = adminModel.Email,
-                Phone = adminModel.Phone,
-                Password = adminModel.Password,
-                Username = adminModel.Username,
-            };
-            _context.Add(admin);
-            await _context.SaveChangesAsync();
-            return admin;
+                return BadRequest();
+            }
+            return Ok(admin);
         }
         [HttpGet("{id}")]
         public async Task<ActionResult<AdminModel>?> GetAdmin(string id)
         {
-            AdminModel? admin = new AdminModel();
-            admin = await _context.Admins.FindAsync(id);
+            AdminModel? admin = await _adminService.GetAdmin(id);
             if (admin != null)
             {
                 return admin;
@@ -44,72 +39,37 @@ namespace pos_system.Admins
             else
             {
                 return NotFound();
-
             }
         }
         [HttpGet]
         public async Task<AdminModel[]> GetAllAdmins()
         {
-            AdminModel[] admins = new AdminModel[0];
-            if (_context != null)
-            {
-                admins = await _context.Admins.ToArrayAsync();
-            }
-
-            return admins;
+            return await _adminService.GetAllAdmins();
         }
 
         [HttpDelete("{id}")]
-        public async Task<bool> DeleteAdmin(string id)
+        public async Task<ActionResult> DeleteAdmin(string id)
         {
-            var admin = await _context.Admins.FindAsync(id);
-            if (admin == null)
+            bool isDeleted = await _adminService.DeleteAdmin(id);
+            if (isDeleted)
             {
-                return false;
+                return NoContent();
             }
-
-            _context.Admins.Remove(admin);
-            await _context.SaveChangesAsync();
-
-            return true;
+            return NotFound();
         }
 
         [HttpPut("{adminId}")]
-        public async Task<AdminModel?> UpdateAdmin(string adminId, AdminPostRequestModel adminModel)
+        public async Task<ActionResult<AdminModel>> UpdateAdmin(string adminId, AdminPostRequestModel adminModel)
         {
-            AdminModel? updated = new AdminModel();
-            if (_context != null)
+            AdminModel? admin = await _adminService.UpdateAdmin(adminId, adminModel);
+            if (admin != null)
             {
-                updated = await _context.Admins.SingleOrDefaultAsync(admin => admin.Id == adminId);
-                if (updated == null)
-                {
-                    return null;
-                }
-                if (adminModel.Name != null)
-                {
-                    updated.Name = adminModel.Name;
-                }
-                if (adminModel.Email != null)
-                {
-                    updated.Email = adminModel.Email;
-                }
-                if (adminModel.Phone != null)
-                {
-                    updated.Phone = adminModel.Phone;
-                }
-                if (adminModel.Password != null)
-                {
-                    updated.Password = adminModel.Password;
-                }
-                if (adminModel.Username != null)
-                {
-                    updated.Username = adminModel.Username;
-                }
-                await _context.SaveChangesAsync();
-                return updated;
+                return Ok(admin);
             }
-            return null;
-
+            else
+            {
+                return NotFound();
+            }
         }
     }
 }
