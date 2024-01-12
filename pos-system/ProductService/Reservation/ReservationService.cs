@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using pos_system.Contexts;
+using pos_system.Workers;
 
 namespace pos_system.ProductService.Reservation
 {
@@ -13,34 +14,12 @@ namespace pos_system.ProductService.Reservation
         public async Task<ReservationModel?> CreateReservation(ReservationPostRequestModel reservationModel)
         {
             var service = await _context.Services.FirstOrDefaultAsync(s => s.Id == reservationModel.ServiceId);
-            if (service == null)
-            {
-                return null;
-            }
 
             TimeSpan duration = service.Duration.HasValue ? TimeSpan.FromMinutes(service.Duration.Value) : TimeSpan.Zero;
             DateTime startDateTime = DateTime.Parse(reservationModel.StartDateTime).AddHours(-2);
             startDateTime = startDateTime.AddSeconds(-startDateTime.Second).AddMilliseconds(-startDateTime.Millisecond);
 
-            if (startDateTime.Minute != 0 && startDateTime.Minute != 30)
-            {
-                return null;
-            }
-
             DateTime endDateTime = startDateTime.Add(duration);
-
-            var reservations = await _context.Reservations
-                .Where(r => r.WorkerId == reservationModel.WorkerId)
-                .ToListAsync();
-
-            var isWorkerBooked =  reservations.Any(r =>
-                r.StartDateTime < endDateTime &&
-                r.StartDateTime.Value.Add(r.Duration.Value) > startDateTime);
-
-            if (isWorkerBooked)
-            {
-                return null;
-            }
 
             ReservationModel reservation = new ReservationModel
             {
@@ -149,6 +128,52 @@ namespace pos_system.ProductService.Reservation
             }
 
             return allSlots;
+        }
+
+        public int validateCreation(ReservationPostRequestModel reservationModel)
+        {
+            var service = _context.Services.FirstOrDefault(s => s.Id == reservationModel.ServiceId);
+            if (service == null)
+            {
+                return 0;
+            }
+
+
+            if (!DateTime.TryParse(reservationModel.StartDateTime, out DateTime startDateTime))
+            {
+                return 3;
+            }
+
+            TimeSpan duration = service.Duration.HasValue ? TimeSpan.FromMinutes(service.Duration.Value) : TimeSpan.Zero;
+            startDateTime = startDateTime.AddSeconds(-startDateTime.Second).AddMilliseconds(-startDateTime.Millisecond);
+
+            if (startDateTime.Minute != 0 && startDateTime.Minute != 30)
+            {
+                return 1;
+            }
+
+            WorkerModel? worker = _context.Workers.Find(reservationModel.WorkerId);
+            if (worker == null)
+            {
+                return 4;
+            }
+
+            DateTime endDateTime = startDateTime.Add(duration);
+
+            var reservations = _context.Reservations
+                .Where(r => r.WorkerId == reservationModel.WorkerId)
+                .ToList();
+
+            var isWorkerBooked = reservations.Any(r =>
+                r.StartDateTime < endDateTime &&
+                r.StartDateTime.Value.Add(r.Duration.Value) > startDateTime);
+
+            if (isWorkerBooked)
+            {
+                return 2;
+            }
+
+            return -1;
         }
     }
 }
